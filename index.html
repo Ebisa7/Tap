@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -43,19 +43,26 @@
 
     .flyingNumber {
         position: absolute;
-        font-size: 35px;
+        font-size: 50px;
         color: #ffffff;
-        animation: flyAndFadeUp 0.5s ease-out forwards; /* Faster animation */
+        pointer-events: none; /* Prevents interference with clicking */
+        animation: flyAndFadeUp 2s ease-out forwards; /* Faster animation */
     }
 
     @keyframes flyAndFadeUp {
         0% {
-            opacity: 5;
+            opacity: 1;
             transform: translateY(0);
+        }
+      
+      50% {
+            opacity: 0.5;
+            transform: translateY(-150px);
         }
         100% {
             opacity: 0;
-            transform: translateY(-50px);
+          
+            transform: translateY(-300px);
         }
     }
 
@@ -70,7 +77,6 @@
         backdrop-filter: blur(50px);
         transition: background-color 0.2s, color 0.2s;
         opacity: 0.8;
-   
     }
 
     #boostButton.disabled {
@@ -82,7 +88,7 @@
 <body>
 <div id="score"><span id="scoreValue">0</span></div>
 <div id="level">🥉 Bronze</div>
-<div id="circle" ontouchstart="tapCircle(event)"></div>
+<div id="circle" ontouchstart="tapCircle(event)" onclick="tapCircle(event)"></div>
 <button id="boostButton" onclick="buyBoost()">Buy Boost (20 coins)</button>
 
 <script>
@@ -97,14 +103,15 @@
     }
 
     function tapCircle(event) {
-        let tapCount = event.touches ? event.touches.length : 1;
+        let tapCount = event.touches ? event.touches.length : 1; // For touch devices, use the number of touches
         coin += boostFactor * tapCount;
         updateScore();
         for (let i = 0; i < tapCount; i++) {
-            let touch = event.touches[i];
+            let touch = event.touches ? event.touches[i] : event; // Use touch event or click event
             updateFlyingNumber(boostFactor, touch.clientX, touch.clientY);
         }
-        apply3DEffect(event.touches[0].clientX, event.touches[0].clientY);
+        apply3DEffect(event.touches ? event.touches[0].clientX : event.clientX, 
+                      event.touches ? event.touches[0].clientY : event.clientY);
     }
 
     function updateFlyingNumber(amount, x, y) {
@@ -115,9 +122,10 @@
         flyingNumber.style.top = y + 'px';
         document.body.appendChild(flyingNumber);
 
+        // Let the number fly and fade out without waiting for others
         setTimeout(function () {
             flyingNumber.remove();
-        }, 500); // Faster removal for quick tapping
+        }, 500); // The flying number stays on screen for 500ms
     }
 
     function apply3DEffect(x, y) {
@@ -127,7 +135,7 @@
         let deltaX = x - centerX;
         let deltaY = y - centerY;
         document.getElementById("circle").style.transform = `rotateX(${deltaY / 200}deg) rotateY(${deltaX / 200}deg)`;
-        
+
         setTimeout(() => {
             document.getElementById("circle").style.transform = '';
         }, 100);
@@ -148,7 +156,7 @@
         let background = "";
         let levelText = "";
 
-          if (coin < 5000) {
+        if (coin < 5000) {
             levelText = "🥉 Bronze";
             background = "linear-gradient(to bottom, black, #cd7f32)";
         } else if (coin < 200000) {
@@ -163,7 +171,7 @@
         } else {
             levelText = "🏆 Platinum";
             background = "linear-gradient(to bottom, black, #11bcff)";
-    }
+        }
 
         levelElement.innerText = levelText;
         document.body.style.background = background;
@@ -174,4 +182,3 @@
 </script>
 </body>
 </html>
-
